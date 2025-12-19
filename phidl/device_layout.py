@@ -44,16 +44,12 @@ import numbers
 import warnings
 from copy import deepcopy as _deepcopy
 
-import gdspy
-
-# Remove this once gdspy fully deprecates current_library
-import gdspy.library
 import numpy as np
 from numpy import cos, mod, pi, sin, sqrt
 
 from phidl.constants import _CSS3_NAMES_TO_HEX
+from phidl import backend
 
-gdspy.library.use_current_library = False
 
 __version__ = "1.7.2"
 
@@ -977,7 +973,8 @@ def _transform_port(
     return new_point, new_orientation
 
 
-class Polygon(gdspy.Polygon, _GeometryHelper):
+
+class Polygon(backend.Polygon, _GeometryHelper):
     """Polygonal geometric object.
 
     Parameters
@@ -1114,7 +1111,7 @@ def make_device(fun, config=None, **kwargs):
     return D
 
 
-class Device(gdspy.Cell, _GeometryHelper):
+class Device(backend.Cell, _GeometryHelper):
     """The basic object that holds polygons, labels, and ports in PHIDL"""
 
     _next_uid = 0
@@ -1299,7 +1296,7 @@ class Device(gdspy.Cell, _GeometryHelper):
         except Exception:
             pass  # Verified points is not a list of polygons, continue on
 
-        if isinstance(points, gdspy.PolygonSet):
+        if isinstance(points, backend.PolygonSet):
             if layer is np.nan:
                 layers = zip(points.layers, points.datatypes)
             else:
@@ -1551,7 +1548,7 @@ class Device(gdspy.Cell, _GeometryHelper):
             self.name = cellname
 
         # Write the gds
-        lib = gdspy.GdsLibrary(unit=unit, precision=precision)
+        lib = backend.Library(unit=unit, precision=precision)
         lib.write_gds(filename, cells=all_cells)
         # Return cells to their original names if they were auto-renamed
         if auto_rename:
@@ -2027,7 +2024,7 @@ class Device(gdspy.Cell, _GeometryHelper):
         return final_hash.hexdigest()
 
 
-class DeviceReference(gdspy.CellReference, _GeometryHelper):
+class DeviceReference(backend.CellReference, _GeometryHelper):
     """Simple reference to an existing Device.
 
     Parameters
@@ -2296,7 +2293,7 @@ class DeviceReference(gdspy.CellReference, _GeometryHelper):
         return self
 
 
-class CellArray(gdspy.CellArray, _GeometryHelper):
+class CellArray(backend.CellArray, _GeometryHelper):
     """Multiple references to an existing cell in an array format.
 
     Parameters
@@ -2435,7 +2432,7 @@ class CellArray(gdspy.CellArray, _GeometryHelper):
         return self
 
 
-class Label(gdspy.Label, _GeometryHelper):
+class Label(backend.Label, _GeometryHelper):
     """Text that can be used to label parts of the geometry or display
     messages. The text does not create additional geometry, it’s meant for
     display and labeling purposes only.
